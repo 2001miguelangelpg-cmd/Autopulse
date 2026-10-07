@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACCESO - Autopulse</title>
+    <meta name="description" content="Inicia sesión en tu cuenta de Autopulse.">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Segoe+UI:wght@400;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="estilos.css">
+</head>
+
+<body>
+
+    <!-- CABECERA DE NAVEGACIÓN -->
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo-link">
+                <img src="https://autopulse.tucontenido.com.co/wp-content/uploads/2026/09/cropped-Autopulse-logo-300x150.png"
+                    alt="Autopulse Logo" class="logo-img">
+            </a>
+            <nav class="nav-links">
+                <a href="index.html">INICIO</a>
+                <a href="registro.html">REGISTRARSE</a>
+                <a href="login.html" class="active">ACCESO</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- FORMULARIO DE ACCESO -->
+    <main class="login-container">
+        <!-- Mensaje de estado/error -->
+        <div id="alertBox" class="alert-box"></div>
+
+        <form id="loginForm" onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label for="userOrEmail">Username or E-mail</label>
+                <input type="text" id="userOrEmail" required autocomplete="username">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" required autocomplete="current-password">
+            </div>
+
+            <div class="button-group">
+                <button type="submit" class="btn-login">Iniciar sesión</button>
+                <a href="registro.html" class="btn-register">REGISTRARSE</a>
+            </div>
+        </form>
+
+        <div class="form-footer">
+            <button class="btn-demo" onclick="loginAsDemo()">Iniciar con Perfil Demo</button>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer>
+        <p>Derechos de autor © 2026 Autopulse | Desarrollado por Tema Astra para WordPress</p>
+    </footer>
+
+    <!-- BOTÓN FLOTANTE WHATSAPP -->
+    <a href="https://wa.me/573000000000" class="whatsapp-float" target="_blank" rel="noopener noreferrer"
+        aria-label="Contacto por WhatsApp">
+        <svg viewBox="0 0 32 32">
+            <path
+                d="M16 0c-8.837 0-16 7.163-16 16 0 2.825 0.737 5.607 2.137 8.048l-2.137 7.952 8.134-2.132c2.378 1.298 5.068 1.98 7.866 1.98 8.837 0 16-7.163 16-16s-7.163-16-16-16zM16 29.35c-2.48 0-4.908-0.67-7.027-1.933l-0.504-0.301-5.221 1.368 1.393-5.184-0.331-0.526c-1.385-2.203-2.115-4.755-2.115-7.374 0-7.614 6.191-13.805 13.805-13.805s13.805 6.191 13.805 13.805-6.191 13.805-13.805 13.805zM22.511 19.167c-0.357-0.179-2.112-1.042-2.439-1.161s-0.565-0.179-0.803 0.179c-0.238 0.357-0.923 1.161-1.131 1.4-0.208 0.238-0.417 0.268-0.774 0.089s-1.513-0.558-2.882-1.778c-1.066-0.95-1.786-2.123-1.994-2.48-0.208-0.357-0.022-0.55 0.156-0.728 0.161-0.16 0.357-0.417 0.536-0.625 0.179-0.208 0.238-0.357 0.357-0.595 0.119-0.238 0.060-0.446-0.030-0.625s-0.803-1.935-1.101-2.649c-0.29-0.695-0.585-0.601-0.803-0.612s-0.446-0.012-0.685-0.012c-0.238 0-0.625 0.089-0.952 0.446s-1.25 1.221-1.25 2.977c0 1.756 1.279 3.453 1.458 3.691s2.519 3.847 6.103 5.394c0.852 0.368 1.518 0.588 2.037 0.753 0.856 0.272 1.636 0.234 2.252 0.142 0.687-0.103 2.112-0.863 2.41-1.697 0.298-0.833 0.298-1.548 0.208-1.697-0.089-0.149-0.327-0.238-0.685-0.417z">
+            </path>
+        </svg>
+    </a>
+
+    <script>
+        // Obtener la lista de usuarios de localStorage
+        function getUsers() {
+            return JSON.parse(localStorage.getItem('autopulse_users')) || [];
+        }
+
+        // Mostrar mensajes de alerta
+        function showAlert(msg, isSuccess = false) {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.innerText = msg;
+            alertBox.className = isSuccess ? 'alert-box success show' : 'alert-box error show';
+        }
+
+        // Proceso de inicio de sesión
+        function handleLogin(e) {
+            e.preventDefault();
+
+            const inputVal = document.getElementById('userOrEmail').value.trim().toLowerCase();
+            const passwordVal = document.getElementById('password').value;
+
+            const users = getUsers();
+
+            // Buscar coincidencia por usuario o email
+            const foundUser = users.find(u =>
+                (u.username.toLowerCase() === inputVal || u.email.toLowerCase() === inputVal) &&
+                u.password === passwordVal
+            );
+
+            if (foundUser) {
+                // Guardar la sesión activa
+                localStorage.setItem('autopulse_logged_user', JSON.stringify(foundUser));
+                showAlert(`¡Bienvenido de nuevo, ${foundUser.firstname || foundUser.username}! Redirigiendo...`, true);
+
+                setTimeout(() => {
+                    window.location.href = 'Home.html'; // Redirigir a la landing / panel principal
+                }, 1500);
+            } else {
+                showAlert('Usuario/correo o contraseña incorrectos');
+            }
+        }
+
+        // Acceso rápido con perfil de prueba (Demo)
+        function loginAsDemo() {
+            const demoUser = {
+                username: 'motero_demo',
+                firstname: 'Juan',
+                lastname: 'Pérez',
+                email: 'demo@autopulse.com'
+            };
+
+            localStorage.setItem('autopulse_logged_user', JSON.stringify(demoUser));
+            showAlert('Iniciando sesión como Usuario Demo...', true);
+
+            setTimeout(() => {
+                window.location.href = 'Home.html';
+            }, 1200);
+        }
+    </script>
+</body>
+
+</html>

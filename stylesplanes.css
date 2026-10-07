@@ -1,0 +1,484 @@
+:root {
+    --blue: #0077FF;
+    /* Color principal */
+    --bg: #1A1A1A;
+    /* Fondo */
+    --gray: #B0B0B0;
+    /* Elementos secundarios */
+    --green: #2ECC71;
+    /* Estado correcto */
+    --red: #E74C3C;
+    /* Alertas */
+    --surface: #242424;
+    --surface2: #2E2E2E;
+    --border: rgba(255, 255, 255, 0.08);
+    --text: #F0F0F0;
+    --font-main: 'Montserrat', sans-serif;
+    /* Legible para interfaces */
+    --font-title: 'Orbitron', sans-serif;
+    /* Estilo tecnológico vehicular */
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: var(--bg);
+    font-family: var(--font-main);
+    color: var(--text);
+    min-height: 100vh;
+}
+
+/* ENCABEZADO DE NAVEGACIÓN */
+.navbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 24px;
+    position: sticky;
+    top: 0;
+    z-index: 900;
+}
+
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.logo-img {
+    height: 40px;
+    width: auto;
+    display: block;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.nav-links a {
+    color: var(--gray);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+    color: var(--blue);
+}
+
+.btn-logout {
+    background: transparent;
+    border: 1px solid var(--red);
+    color: var(--red);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-family: var(--font-main);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-logout:hover {
+    background: var(--red);
+    color: #fff;
+}
+
+/* CONTENEDOR PRINCIPAL */
+.container {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 40px 16px;
+}
+
+/* HEADER DE LA PÁGINA */
+.brand-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.brand-logo {
+    font-family: var(--font-title);
+    font-size: 24px;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: 2px;
+}
+
+.brand-logo span {
+    color: var(--blue);
+}
+
+.brand-tagline {
+    font-size: 13px;
+    color: var(--gray);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 4px;
+}
+
+/* CONTENEDOR PRINCIPAL FLUIDO */
+.flow-wrapper {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+}
+
+/* TARJETA DE PLAN */
+.plan-card {
+    padding: 30px 24px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.plan-card.hidden {
+    display: none;
+}
+
+.plan-icon {
+    font-size: 40px;
+    margin-bottom: 12px;
+    filter: drop-shadow(0 0 8px rgba(46, 236, 113, 0.2));
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-6px);
+    }
+}
+
+.plan-title {
+    font-family: var(--font-title);
+    font-size: 18px;
+    color: #fff;
+    font-weight: 900;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+}
+
+.plan-subtitle {
+    font-size: 13px;
+    color: var(--gray);
+    margin-bottom: 14px;
+    line-height: 1.4;
+}
+
+.plan-price {
+    font-family: var(--font-title);
+    font-size: 32px;
+    font-weight: 900;
+    color: var(--text);
+    margin-bottom: 20px;
+}
+
+.plan-price span {
+    color: var(--blue);
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.plan-features {
+    text-align: left;
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+.feature-item {
+    font-size: 14px;
+    color: #D0D0D0;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.feature-item:last-child {
+    margin-bottom: 0;
+}
+
+.feature-item::before {
+    content: '•';
+    color: var(--blue);
+    font-size: 16px;
+    font-weight: bold;
+    margin-left: 4px;
+}
+
+.btn-checkout {
+    width: 100%;
+    background: var(--blue);
+    border: none;
+    color: #fff;
+    font-family: var(--font-title);
+    font-size: 13px;
+    font-weight: 900;
+    padding: 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 15px rgba(0, 119, 255, 0.3);
+    transition: all 0.2s;
+}
+
+.btn-checkout:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0, 119, 255, 0.5);
+    background: #0066DD;
+}
+
+/* SIMULADOR DE PASARELA DE PAGO */
+.checkout-form {
+    padding: 24px;
+    display: none;
+}
+
+.checkout-form.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.checkout-title {
+    font-family: var(--font-title);
+    font-size: 12px;
+    color: var(--blue);
+    letter-spacing: 1.5px;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+}
+
+.checkout-sub {
+    font-size: 13px;
+    color: var(--gray);
+    margin-bottom: 20px;
+}
+
+.order-summary {
+    background: var(--surface2);
+    padding: 12px 14px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 3px solid var(--blue);
+}
+
+.order-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.order-price {
+    font-family: var(--font-title);
+    font-size: 14px;
+    font-weight: 900;
+    color: var(--blue);
+}
+
+.form-group {
+    margin-bottom: 14px;
+    text-align: left;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--gray);
+    letter-spacing: .7px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+
+.form-group input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: #fff;
+    font-family: var(--font-main);
+    font-size: 14px;
+    padding: 11px 12px;
+    outline: none;
+    transition: border-color .2s;
+}
+
+.form-group input:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(0, 119, 255, .1);
+}
+
+.simulation-notice {
+    background: rgba(0, 119, 255, 0.08);
+    border: 1px solid rgba(0, 119, 255, 0.25);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 11px;
+    color: #A0CFFF;
+    line-height: 1.4;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.btn-pay {
+    width: 100%;
+    background: var(--green);
+    border: none;
+    color: #111;
+    border-radius: 8px;
+    padding: 13px;
+    font-family: var(--font-title);
+    font-size: 12px;
+    font-weight: 900;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all .2s;
+}
+
+.btn-pay:hover {
+    background: #27ae60;
+    color: #fff;
+}
+
+/* PANTALLA DE ÉXITO */
+.success-screen {
+    padding: 40px 24px;
+    text-align: center;
+    display: none;
+}
+
+.success-screen.active {
+    display: block;
+    animation: scaleUp 0.3s ease;
+}
+
+@keyframes scaleUp {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.success-icon {
+    font-size: 48px;
+    color: var(--green);
+    margin-bottom: 16px;
+    animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes pop {
+    from {
+        transform: scale(0);
+    }
+
+    to {
+        transform: scale(1);
+    }
+}
+
+.success-title {
+    font-family: var(--font-title);
+    font-size: 18px;
+    color: var(--green);
+    font-weight: 900;
+    margin-bottom: 8px;
+}
+
+.success-text {
+    font-size: 13px;
+    color: var(--gray);
+    line-height: 1.5;
+}
+
+.timer-display {
+    font-family: var(--font-title);
+    font-size: 20px;
+    color: #fff;
+    margin-top: 15px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+/* TOAST DE ALERTA */
+.toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--surface2);
+    border: 1px solid var(--red);
+    border-radius: 30px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--red);
+    z-index: 300;
+    transition: transform .3s ease;
+    white-space: nowrap;
+    font-family: var(--font-main);
+}
+
+.toast.show {
+    transform: translateX(-50%) translateY(0);
+}
+
+/* RESPONSIVO NAVEGACIÓN */
+@media (max-width: 600px) {
+    .nav-container {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .nav-links {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px 14px;
+    }
+}

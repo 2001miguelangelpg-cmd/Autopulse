@@ -1,0 +1,445 @@
+/* ==========================================================================
+   1. VARIABLES GLOBALES Y RESET
+   ========================================================================== */
+:root {
+    --bg-color: #1a1a1a;
+    --surface-color: #242424;
+    --surface-color-2: #2e2e2e;
+    --text-color: #ffffff;
+    --text-muted: #808080;
+
+    /* Colores de Marca y Acciones */
+    --blue-primary: #0077FF;
+    --blue-hover: #0055cc;
+    --blue-btn: #3498db;
+    --blue-btn-hover: #2980b9;
+
+    /* Entradas e Interfaz */
+    --input-bg: #ffffff;
+    --input-text: #000000;
+    --btn-gray: #e6e6e6;
+    --btn-gray-hover: #cccccc;
+    --border-line: rgba(255, 255, 255, 0.15);
+
+    /* Estados y Alertas */
+    --green-success: #2ecc71;
+    --red-error: #e74c3c;
+    --orange-warning: #f39c12;
+
+    /* Tipografías */
+    --font-title: 'Orbitron', sans-serif;
+    --font-body: 'Segoe UI', Arial, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* ==========================================================================
+   2. CABECERA Y NAVEGACIÓN GLOBAL
+   ========================================================================== */
+header,
+.navbar {
+    background-color: #111111;
+    border-bottom: 1px solid var(--border-line);
+    padding: 15px 0;
+    width: 100%;
+}
+
+.header-container,
+.nav-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo-img {
+    height: 75px;
+    width: auto;
+    display: block;
+}
+
+nav ul,
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 25px;
+}
+
+nav a,
+.nav-links a {
+    color: var(--text-color);
+    text-decoration: none;
+    font-family: var(--font-title);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    transition: color 0.3s ease;
+}
+
+nav a:hover,
+.nav-links a:hover,
+.nav-links a.active {
+    color: var(--blue-primary);
+}
+
+/* ==========================================================================
+   3. BOTONES Y COMPONENTES REUTILIZABLES
+   ========================================================================== */
+.btn {
+    background-color: var(--blue-primary);
+    color: white;
+    padding: 12px 30px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 16px;
+    display: inline-block;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background-color: var(--blue-hover);
+    box-shadow: 0 0 15px var(--blue-primary);
+}
+
+.btn-demo {
+    background: transparent;
+    border: 1px solid #555;
+    color: #aaa;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.3s ease;
+}
+
+.btn-demo:hover {
+    border-color: #888;
+    color: #fff;
+}
+
+/* Caja de Mensajes / Alertas */
+.alert-box {
+    display: none;
+    width: 100%;
+    padding: 10px 14px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    font-size: 14px;
+    text-align: center;
+}
+
+.alert-box.show {
+    display: block;
+}
+
+.alert-box.error {
+    background-color: rgba(231, 76, 60, 0.2);
+    border: 1px solid var(--red-error);
+    color: var(--red-error);
+}
+
+.alert-box.success {
+    background-color: rgba(46, 204, 113, 0.2);
+    border: 1px solid var(--green-success);
+    color: var(--green-success);
+}
+
+/* Botón Flotante de WhatsApp */
+.whatsapp-float {
+    position: fixed;
+    width: 50px;
+    height: 50px;
+    bottom: 25px;
+    right: 25px;
+    background-color: #25d366;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    transition: transform 0.3s ease;
+    text-decoration: none;
+}
+
+.whatsapp-float:hover {
+    transform: scale(1.1);
+}
+
+.whatsapp-float svg {
+    width: 28px;
+    height: 28px;
+    fill: #ffffff;
+}
+
+/* ==========================================================================
+   4. PÁGINA PRINCIPAL / LANDING PAGE
+   ========================================================================== */
+/* Hero Section */
+.hero {
+    padding: 100px 0 80px 0;
+    text-align: center;
+    background: linear-gradient(180deg, #111 0%, var(--bg-color) 100%);
+}
+
+.hero h1 {
+    font-size: 42px;
+    color: var(--text-color);
+    margin-bottom: 20px;
+}
+
+.hero h1 span {
+    color: var(--blue-primary);
+}
+
+.hero p {
+    font-size: 18px;
+    color: var(--text-muted);
+    max-width: 600px;
+    margin: 0 auto 30px auto;
+}
+
+/* Features Section */
+.features {
+    padding: 60px 0;
+}
+
+.section-title {
+    text-align: center;
+    font-size: 32px;
+    margin-bottom: 40px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+}
+
+.card {
+    background-color: var(--surface-color);
+    padding: 30px;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid #333;
+}
+
+.card h3 {
+    color: var(--blue-primary);
+    font-size: 20px;
+    margin-bottom: 15px;
+}
+
+/* Pricing Section */
+.pricing {
+    padding: 60px 0;
+    background-color: #151515;
+}
+
+.price-card {
+    background-color: var(--surface-color);
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 40px;
+    border-radius: 8px;
+    text-align: center;
+    border: 2px solid var(--blue-primary);
+}
+
+.price {
+    font-size: 36px;
+    font-weight: bold;
+    color: var(--text-color);
+    margin: 20px 0;
+}
+
+.price span {
+    color: var(--blue-primary);
+}
+
+.btn-pricing {
+    margin-top: 20px;
+    width: 80%;
+}
+
+/* ==========================================================================
+   5. MÓDULOS DE FORMULARIO (REGISTRO Y ACCESO)
+   ========================================================================== */
+.register-container,
+.login-container {
+    flex: 1;
+    width: 100%;
+    max-width: 480px;
+    margin: 50px auto;
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.title {
+    font-family: var(--font-title);
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    margin-bottom: 30px;
+    text-transform: uppercase;
+    text-align: center;
+}
+
+form {
+    width: 100%;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.form-group label {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 14px;
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    border: none;
+    border-radius: 2px;
+    font-size: 15px;
+    outline: none;
+}
+
+.form-group input::placeholder {
+    color: #888888;
+}
+
+/* Botón Submit Formulario Registro */
+.btn-submit {
+    width: 45%;
+    margin: 15px auto 0 auto;
+    display: block;
+    padding: 12px;
+    background-color: var(--blue-btn-hover);
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-submit:hover {
+    background-color: var(--blue-btn);
+}
+
+/* Grupo de Botones Formulario Acceso/Login */
+.button-group {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+    width: 100%;
+}
+
+.btn-login {
+    flex: 1;
+    padding: 12px;
+    background-color: var(--blue-btn);
+    color: #ffffff;
+    border: none;
+    border-radius: 3px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-login:hover {
+    background-color: var(--blue-btn-hover);
+}
+
+.btn-register {
+    flex: 1;
+    padding: 12px;
+    background-color: var(--btn-gray);
+    color: #333333;
+    text-decoration: none;
+    text-align: center;
+    border-radius: 3px;
+    font-family: var(--font-title);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    display: inline-block;
+    transition: background-color 0.3s ease;
+}
+
+.btn-register:hover {
+    background-color: var(--btn-gray-hover);
+}
+
+.form-footer {
+    margin-top: 25px;
+    text-align: center;
+}
+
+.form-footer p {
+    font-size: 14px;
+    color: #ccc;
+}
+
+.form-footer a {
+    color: var(--blue-btn);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.form-footer a:hover {
+    text-decoration: underline;
+}
+
+/* ==========================================================================
+   6. FOOTER GLOBAL
+   ========================================================================== */
+footer {
+    text-align: center;
+    padding: 30px 20px;
+    color: var(--text-muted);
+    font-size: 14px;
+    border-top: 1px solid #333;
+    background-color: #111111;
+    margin-top: auto;
+}

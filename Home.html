@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autopulse - Panel de Usuario</title>
+    <meta name="description"
+        content="Controla el SOAT, cambio de aceite y mantenimiento de tu moto en Colombia. Evita multas y cuida tu motor.">
+    <meta name="keywords" content="motos, SOAT, mantenimiento, fotomultas, cambio de aceite, Colombia, taller, moteros">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Orbitron:wght@700;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <!-- CABECERA DE NAVEGACIÓN SESIÓN INICIADA -->
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="Home.html" class="logo-link">
+                <img src="https://autopulse.tucontenido.com.co/wp-content/uploads/2026/09/cropped-Autopulse-logo-300x150.png"
+                    alt="Autopulse Logo" class="logo-img">
+            </a>
+            <nav class="nav-links">
+                <a href="Home.html" class="active">INICIO</a>
+                <a href="#usuario">USUARIO</a>
+                <a href="garaje.html">GARAJE</a>
+                <a href="planes.html">PLANES</a>
+                <a href="manuales.html">MANUALES DE USUARIO</a>
+                <button onclick="logout()" class="btn-logout">SALIR</button>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <h1>Bienvenido a tu Panel <span>Autopulse</span></h1>
+            <p>Monitorea y administra el estado de tus vehículos, vigencia de SOAT, mantenimientos preventivos y cambio
+                de aceite en tiempo real.</p>
+            <a href="#garaje" class="btn">Gestionar Garaje</a>
+        </div>
+    </section>
+
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title">¿Cómo funciona Autopulse?</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>🟢 Semáforo Inteligente</h3>
+                    <p>Alertas visuales automáticas en verde, amarillo y rojo que te indican el estado crítico de tus
+                        documentos obligatorios.</p>
+                </div>
+                <div class="card">
+                    <h3>🏍️ Garaje Virtual</h3>
+                    <p>Registra el kilometraje actual, placa y modelo de tu motocicleta para calcular de forma
+                        matemática sus próximos mantenimientos.</p>
+                </div>
+                <div class="card">
+                    <h3>🛢️ Control de Aceite</h3>
+                    <p>Monitorea el desgaste de los lubricantes y la vida útil de tus llantas para prevenir daños
+                        mecánicos costosos en tu motor.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="planes" class="pricing">
+        <div class="container">
+            <h2 class="section-title">Planes Hechos para Moteros</h2>
+
+            <!-- CUADRO DE PLANES TRADICIONAL (Se oculta al activarse Autopulse Pro) -->
+            <div id="pricingCard" class="price-card">
+                <h3>Plan Autopulse Pro</h3>
+                <p style="margin-top: 8px;">Ideal para familias, mensajeros o moteros organizados que quieren el control
+                    total.</p>
+                <div class="price">$4.900 <span>COP/mes</span></div>
+                <p
+                    style="text-align: left; max-width: 290px; margin: 0 auto; line-height: 1.8; font-size: 14px; color: var(--gray);">
+                    • Control de más de 1 moto en la misma cuenta<br>
+                    • <b>Acceso completo a manuales de usuario y técnicos</b><br>
+                    • Alertas y recordatorios visuales ilimitados<br>
+                    • Soporte prioritario
+                </p>
+                <button onclick="redirectToPayment()" class="btn" style="margin-top: 25px; width: 100%;">Activar Plan
+                    Pro</button>
+            </div>
+
+            <!-- BLOQUE DINÁMICO: ESTADO PREMIUM ACTIVADO (Reemplaza la tarjeta de planes) -->
+            <div id="proStatusBox" class="pro-status-container">
+                <div class="pro-badge-icon">👑</div>
+                <div class="pro-status-title">AUTOPULSE PRO ACTIVO</div>
+                <div class="pro-status-text">¡Tu cuenta cuenta con todos los privilegios premium habilitados! Las
+                    restricciones del garaje virtual y la base de datos de manuales técnicos han sido removidas.</div>
+                <div id="landingCountdown" class="pro-timer">00:00</div>
+            </div>
+
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>Derechos de autor © 2026 Autopulse | Diseñado para Modelos de Negocios Digitales - Unilatina</p>
+        </div>
+    </footer>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        const landingChannel = new BroadcastChannel('autopulse_pro_stream');
+        let timerInterval = null;
+
+        function checkGlobalPremiumStatus() {
+            const pricingCard = document.getElementById('pricingCard');
+            const proStatusBox = document.getElementById('proStatusBox');
+
+            const savedExpiry = localStorage.getItem('autopulse_pro_expiry');
+            const isProActive = savedExpiry && parseInt(savedExpiry) > Date.now();
+
+            if (isProActive) {
+                pricingCard.classList.add('hidden');
+                proStatusBox.classList.add('active');
+
+                const remainingTime = Math.floor((parseInt(savedExpiry) - Date.now()) / 1000);
+                startLandingTimer(remainingTime);
+            } else {
+                pricingCard.classList.remove('hidden');
+                proStatusBox.classList.remove('active');
+                if (timerInterval) clearInterval(timerInterval);
+            }
+        }
+
+        function startLandingTimer(duration) {
+            if (timerInterval) clearInterval(timerInterval);
+            let timer = duration, minutes, seconds;
+            const display = document.getElementById('landingCountdown');
+
+            timerInterval = setInterval(function () {
+                minutes = parseInt(timer / 60, 10);
+                seconds = parseInt(timer % 60, 10);
+
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                display.textContent = minutes + ":" + seconds;
+
+                if (--timer < 0) {
+                    clearInterval(timerInterval);
+                    localStorage.removeItem('autopulse_pro_expiry');
+                    checkGlobalPremiumStatus();
+                }
+            }, 1000);
+        }
+
+        function redirectToPayment() {
+            window.location.href = 'https://autopulse.tucontenido.com.co/?page_id=309';
+        }
+
+        function logout() {
+            // Redirige de regreso a index.html al cerrar sesión
+            window.location.href = 'index.html';
+        }
+
+        function showToast(msg, isError = false) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            if (isError) {
+                toast.className = "toast show error";
+            } else {
+                toast.className = "toast show";
+            }
+            setTimeout(() => { toast.classList.remove('show'); }, 3000);
+        }
+
+        landingChannel.onmessage = (e) => {
+            if (e.data.event === 'PRO_ACTIVATED') {
+                showToast('👑 ¡Suscripción AUTOPULSE PRO activada!');
+                checkGlobalPremiumStatus();
+            }
+            if (e.data.event === 'PRO_EXPIRED') {
+                showToast('⚠️ Tu acceso AUTOPULSE PRO ha caducado.', true);
+                checkGlobalPremiumStatus();
+            }
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            checkGlobalPremiumStatus();
+            setInterval(checkGlobalPremiumStatus, 4000);
+        });
+    </script>
+</body>
+
+</html>

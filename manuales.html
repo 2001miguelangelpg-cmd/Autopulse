@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autopulse — Manuales Técnicos de Motocicletas</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Orbitron:wght@700;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="stylesmanuales.css">
+</head>
+
+<body>
+
+    <!-- CABECERA DE NAVEGACIÓN SESIÓN INICIADA -->
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="Home.html" class="logo-link">
+                <img src="https://autopulse.tucontenido.com.co/wp-content/uploads/2026/09/cropped-Autopulse-logo-300x150.png"
+                    alt="Autopulse Logo" class="logo-img">
+            </a>
+            <nav class="nav-links">
+                <a href="Home.html">INICIO</a>
+                <a href="#usuario">USUARIO</a>
+                <a href="garaje.html">GARAJE</a>
+                <a href="planes.html">PLANES</a>
+                <a href="manuales.html" class="active">MANUALES DE USUARIO</a>
+                <button onclick="logout()" class="btn-logout">SALIR</button>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <div class="section-header">
+            <div class="section-st">Biblioteca de Manuales</div>
+            <div id="proBadge" class="pro-status-badge free">CUENTA GRATUITA</div>
+        </div>
+
+        <div class="search-wrapper">
+            <input id="searchInput" type="text" class="search-input"
+                placeholder="🔍 Buscar por marca o modelo (Ej: Honda, Yamaha...)" oninput="filterManuales()">
+        </div>
+
+        <div id="premiumLock" class="premium-lockout-box">
+            <div class="lock-icon">👑</div>
+            <div class="lock-title">CONTENIDO EXCLUSIVO DE AUTOPULSE PRO</div>
+            <div class="lock-text">La consulta en línea y descarga de diagramas eléctricos, manuales de usuario y
+                manuales de taller estructurados de alta velocidad están limitados a usuarios Premium.</div>
+            <a href="https://autopulse.tucontenido.com.co/?page_id=309"
+                style="display: inline-block; text-decoration: none;">
+                <button class="btn-unlock" onclick="goToPaymentPage(event)">DESBLOQUEAR ACCESO PRO</button>
+            </a>
+        </div>
+
+        <div id="resultsContainer" class="results-container">
+            <div id="manualsList"></div>
+        </div>
+
+    </div>
+
+    <div id="viewModal" class="modal-overlay" onclick="closeModalOnOverlay(event)">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div id="modalHeaderTitle" class="modal-title-text">VISOR TÉCNICO AUTOPULSE</div>
+                <button class="btn-close-modal" onclick="closeManualModal()">✕</button>
+            </div>
+            <div id="modalBodyContent" class="modal-body"></div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        const proStream = new BroadcastChannel('autopulse_pro_stream');
+
+        // Base de datos expandida con el contenido técnico interno para visualización y descarga
+        const MANUALES_DB = [
+            { marca: "honda", modelo: "Honda CB 190R", tipo: "Manual de Taller / Despiece", size: "14.2 MB", paginas: 320, esquema: "[SISTEMA ELÉCTRICO PGM-FI]\n- Resistencia Inyector: 11.1-11.5 Ω\n- Presión Bomba Combustible: 294 kPa\n- Luz de válvulas (Frío): Admisión: 0.08mm | Escape: 0.24mm\n- Torque de culata: 32 N·m" },
+            { marca: "honda", modelo: "Honda XR 150L", tipo: "Manual de Usuario", size: "4.8 MB", paginas: 115, esquema: "[MANTENIMIENTO PERIÓDICO]\n- Capacidad Aceite: 1.0 Litros (10W-30 API MA)\n- Bujía recomendada: CPR8EA-9 (Holgura: 0.8-0.9mm)\n- Ralentí motor: 1,400 ± 100 rpm\n- Cadena de arrastre: Holgura 25-35mm" },
+            { marca: "honda", modelo: "Honda Twister CB 250", tipo: "Diagrama Eléctrico de Taller", size: "8.1 MB", paginas: 240, esquema: "[DIAGRAMA DE ENCENDIDO ELECTRÓNICO]\n- Alternador salida trifásica: 14.5V a 5000 rpm\n- Resistencia Bobina de Pulso: 240 Ω\n- Fusible Principal: 30A | Fusibles Auxiliares: 10A/15A" },
+            { marca: "yamaha", modelo: "Yamaha FZ25", tipo: "Manual de Taller", size: "18.5 MB", paginas: 412, esquema: "[PARÁMETROS DE REPARACIÓN DE MOTOR]\n- Presión de compresión: 1200 kPa\n- Presión de aceite de lubricación: 140 kPa a 5000rpm\n- Holgura de válvula: Adm: 0.05-0.10mm | Esc: 0.10-0.15mm" },
+            { marca: "yamaha", modelo: "Yamaha R15 V3", tipo: "Manual de Usuario", size: "6.2 MB", paginas: 148, esquema: "[SISTEMA VVA - VARIABLE VALVE ACTUATION]\n- Punto de activación solenoide: 7,400 rpm\n- Líquido de refrigeración: Mezcla 1:1 Etilenglicol (0.49L)\n- Relación de compresión: 11.6:1" },
+            { marca: "yamaha", modelo: "Yamaha XTZ 125", tipo: "Guía de Mantenimiento Preventivo", size: "3.1 MB", paginas: 90, esquema: "[SISTEMA DE CHASIS Y SUSPENSIÓN]\n- Aceite barra delantera: 154 cm³ por barra (10W)\n- Presión neumático delantero: 22 psi | Trasero: 25 psi\n- Desgaste límite pastilla de freno: 4.5mm" },
+            { marca: "suzuki", modelo: "Suzuki Gixxer 150 SF", tipo: "Manual Técnico de Despiece", size: "11.4 MB", paginas: 280, esquema: "[SISTEMA SEP - SUZUKI ECO PERFORMANCE]\n- Sensor de O2 voltaje oscilación: 0.1V a 0.9V\n- Resistencia sensor temperatura motor (ECT): 2.4 kΩ a 20°C\n- Holgura del cable del acelerador: 2.0-4.0mm" },
+            { marca: "suzuki", modelo: "Suzuki GN 125", tipo: "Manual de Taller Integral", size: "9.7 MB", paginas: 195, esquema: "[SISTEMA MECÁNICO GENERAL]\n- Holgura taqués admisión/escape: 0.08 - 0.13 mm\n- Embrague: juego libre de la maneta: 10-15 mm\n- Capacidad del tanque de combustible: 10.3 Litros" },
+            { marca: "ktm", modelo: "KTM Duke 200 / 390", tipo: "Manual Técnico de Reparación", size: "22.3 MB", paginas: 560, esquema: "[SISTEMA DE DOBLE ÁRBOL DE LEVAS - DOHC]\n- Torque tornillos de biela: 12 N·m + 90°\n- Presión del sistema de combustible (EFI): 4.2 Bar\n- Luz de válvulas: Adm: 0.10-0.15mm | Esc: 0.15-0.20mm" },
+            { marca: "pulsar", modelo: "Pulsar NS 200 FI", tipo: "Diagrama de Inyección y Eléctrico", size: "12.0 MB", paginas: 180, esquema: "[TECNOLOGÍA TRIPLE BUJÍA DTS-i]\n- Sincronización de chispa controlada por ECU de 16 bits\n- Resistencia de la bobina de encendido primaria: 0.4 a 0.6 Ω\n- Holgura de electrodo de bujías: 0.7 a 0.8 mm" }
+        ];
+
+        function checkPremiumStatus() {
+            const badge = document.getElementById('proBadge');
+            const lockBox = document.getElementById('premiumLock');
+            const resultsContainer = document.getElementById('resultsContainer');
+
+            const savedExpiry = localStorage.getItem('autopulse_pro_expiry');
+            const isPro = savedExpiry && parseInt(savedExpiry) > Date.now();
+
+            if (isPro) {
+                badge.innerText = "PLAN PRO ACTIVO";
+                badge.className = "pro-status-badge pro";
+                lockBox.classList.remove('active');
+                resultsContainer.classList.remove('hidden');
+            } else {
+                badge.innerText = "CUENTA GRATUITA";
+                badge.className = "pro-status-badge free";
+                lockBox.classList.add('active');
+                resultsContainer.classList.add('hidden');
+            }
+        }
+
+        function filterManuales() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            const listContainer = document.getElementById('manualsList');
+            listContainer.innerHTML = '';
+
+            const filtered = MANUALES_DB.filter(m =>
+                m.modelo.toLowerCase().includes(query) ||
+                m.tipo.toLowerCase().includes(query) ||
+                m.marca.toLowerCase().includes(query)
+            );
+
+            if (filtered.length === 0) {
+                listContainer.innerHTML = `<div class="empty-search-state">No se encontraron manuales que coincidan con tu búsqueda.</div>`;
+                return;
+            }
+
+            filtered.forEach((m, index) => {
+                const card = document.createElement('div');
+                card.className = 'manual-card';
+                card.innerHTML = `
+                    <div class="manual-info">
+                        <div class="manual-title">${m.modelo}</div>
+                        <div style="font-size: 12px; color: var(--blue); font-weight:600; margin-top:2px;">${m.tipo}</div>
+                        <div class="manual-meta">
+                            <span>💾 ${m.size}</span>
+                            <span>📄 ${m.paginas} Pág.</span>
+                        </div>
+                    </div>
+                    <div class="actions-wrapper">
+                        <button class="btn-action view" onclick="openManualViewer(${index})">👁️ Ver</button>
+                        <button class="btn-action download" onclick="executeManualDownload(${index})">📥 Guardar</button>
+                    </div>
+                `;
+                listContainer.appendChild(card);
+            });
+        }
+
+        function openManualViewer(index) {
+            const manual = MANUALES_DB[index];
+            const modal = document.getElementById('viewModal');
+            const bodyContent = document.getElementById('modalBodyContent');
+            document.getElementById('modalHeaderTitle').innerText = `${manual.modelo.toUpperCase()}`;
+
+            modal.classList.add('open');
+            bodyContent.innerHTML = `
+                <div class="loader-container">
+                    <div style="font-family: var(--font-title); font-size:12px; font-weight:700; color:var(--blue);">DECODIFICANDO FICHERO SEGURO...</div>
+                    <div style="font-size:11px; color:var(--gray); margin-top:4px;">Tamaño: ${manual.size} | Fichero en caché local</div>
+                    <div class="progress-bar-bg">
+                        <div id="modalProgressBar" class="progress-bar-fill"></div>
+                    </div>
+                </div>
+            `;
+
+            let progress = 0;
+            const bar = document.getElementById('modalProgressBar');
+            const interval = setInterval(() => {
+                progress += 5;
+                if (bar) bar.style.width = `${progress}%`;
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    bodyContent.innerHTML = `
+                        <div style="margin-bottom:12px;">
+                            <span style="background:rgba(0,119,255,0.1); color:var(--blue); padding:4px 8px; font-size:11px; font-weight:700; border-radius:4px; text-transform:uppercase;">
+                                ${manual.tipo}
+                            </span>
+                        </div>
+                        <p style="margin-bottom:14px; font-size:13px; color:var(--gray);">
+                            Visualizando la sección de tolerancias mecánicas y calibración de fábrica para <strong>${manual.modelo}</strong> (${manual.paginas} páginas indexadas).
+                        </p>
+                        <div style="font-size:11px; font-weight:700; color:var(--green); text-transform:uppercase; margin-bottom:4px; font-family: var(--font-title);">
+                            Ficha Técnico de Datos y Ajustes:
+                        </div>
+                        <div class="blueprint-box">${manual.esquema}</div>
+                        <div style="margin-top:20px; text-align:right;">
+                            <button class="btn-action download" style="width:100%; padding:11px;" onclick="executeManualDownload(${index})">📥 Descargar Fichero Completo (.TXT)</button>
+                        </div>
+                    `;
+                }
+            }, 45);
+        }
+
+        function executeManualDownload(index) {
+            const manual = MANUALES_DB[index];
+            showToast(`📦 Compilando descarga de: ${manual.modelo}...`, 'success');
+
+            setTimeout(() => {
+                const contenidoDelArchivo = `========================================================\n` +
+                    `    AUTOPULSE PRO DIAGNOSTICS - MANUAL DE ESPECIFICACIONES\n` +
+                    `========================================================\n\n` +
+                    `Modelo: ${manual.modelo}\n` +
+                    `Tipo de Documento: ${manual.tipo}\n` +
+                    `Peso Estimado original: ${manual.size}\n` +
+                    `Total páginas indexadas: ${manual.paginas}\n\n` +
+                    `--------------------------------------------------------\n` +
+                    `ESQUEMAS Y DATOS TÉCNICOS EXTRAÍDOS DE FÁBRICA:\n` +
+                    `--------------------------------------------------------\n` +
+                    `${manual.esquema}\n\n` +
+                    `========================================================\n` +
+                    ` Fichero descargado mediante simulación Autopulse PRO \n` +
+                    `========================================================`;
+
+                const blob = new Blob([contenidoDelArchivo], { type: "text/plain;charset=utf-8" });
+                const url = URL.createObjectURL(blob);
+
+                const elementoEnlace = document.createElement('a');
+                elementoEnlace.href = url;
+                elementoEnlace.download = `Manual_${manual.modelo.replace(/\s+/g, '_')}_AutopulsePRO.txt`;
+                document.body.appendChild(elementoEnlace);
+                elementoEnlace.click();
+
+                document.body.removeChild(elementoEnlace);
+                URL.revokeObjectURL(url);
+
+                showToast(`✅ ¡Archivo guardado con éxito!`, 'success');
+            }, 800);
+        }
+
+        function closeManualModal() {
+            document.getElementById('viewModal').classList.remove('open');
+        }
+
+        function closeModalOnOverlay(e) {
+            if (e.target === document.getElementById('viewModal')) {
+                closeManualModal();
+            }
+        }
+
+        function goToPaymentPage(e) {
+            console.log('Navegando a la pasarela premium en la pestaña actual...');
+        }
+
+        function logout() {
+            console.log('Cerrando sesión...');
+        }
+
+        function showToast(msg, type = 'success') {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.className = `toast show ${type}`;
+            setTimeout(() => { t.classList.remove('show'); }, 3000);
+        }
+
+        proStream.onmessage = (e) => {
+            if (e.data.event === 'PRO_ACTIVATED') {
+                showToast('👑 ¡Acceso a Manuales PRO desbloqueado!', 'success');
+                checkPremiumStatus();
+            }
+            if (e.data.event === 'PRO_EXPIRED') {
+                closeManualModal();
+                showToast('⚠️ Tu acceso temporal PRO ha expirado.', 'error');
+                checkPremiumStatus();
+            }
+        };
+
+        window.onload = function () {
+            checkPremiumStatus();
+            filterManuales();
+            setInterval(checkPremiumStatus, 4000);
+        };
+    </script>
+</body>
+
+</html>

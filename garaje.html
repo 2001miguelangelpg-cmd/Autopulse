@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autopulse — Control de Estado de Vehículos</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Orbitron:wght@700;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="stylesgaraje.css">
+</head>
+
+<body>
+
+    <!-- CABECERA DE NAVEGACIÓN PRIVADA -->
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="Home.html" class="logo-link">
+                <img src="https://autopulse.tucontenido.com.co/wp-content/uploads/2026/09/cropped-Autopulse-logo-300x150.png"
+                    alt="Autopulse Logo" class="logo-img">
+            </a>
+            <nav class="nav-links">
+                <a href="Home.html">INICIO</a>
+                <a href="#usuario">USUARIO</a>
+                <a href="garaje.html" class="active">GARAJE</a>
+                <a href="Planes.html">PLANES</a>
+                <a href="manuales.html">MANUALES DE USUARIO</a>
+            </nav>
+            <div class="nav-right-actions">
+                <div id="alertBadge" class="alert-badge">0 alertas</div>
+                <button onclick="logout()" class="btn-logout">SALIR</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <div id="alertBanner" class="alert-banner">
+            <div class="alert-banner-header">
+                <span style="font-size:16px">⚠️</span>
+                <div class="alert-banner-title">ALERTAS DE ATENCIÓN CRÍTICA</div>
+            </div>
+            <div id="alertList"></div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('vehicles')">🏍 Mi Garaje</button>
+            <button class="tab" onclick="switchTab('add')">＋ Registrar</button>
+        </div>
+
+        <div id="tab-vehicles" class="section active">
+            <div class="section-title">Vehículos Activos</div>
+            <div id="vehicleList"></div>
+        </div>
+
+        <div id="tab-add" class="section" style="position: relative;">
+            <div class="section-title">Nuevo Registro</div>
+
+            <div id="premiumLock" class="premium-lockout">
+                <div class="premium-box">
+                    <div class="premium-icon">👑</div>
+                    <div class="premium-title">CUENTA GRATUITA LIMITADA</div>
+                    <div class="premium-text">Has alcanzado el límite máximo de la versión gratuita (1 vehículo). Activa
+                        Autopulse PRO para monitorear motocicletas ilimitadas en tiempo real.</div>
+                    <button class="btn-premium" onclick="redirectToPremium()">DESBLOQUEAR PRO</button>
+                </div>
+            </div>
+
+            <div id="formContainer">
+                <div class="form-st">CONFIGURACIÓN INICIAL</div>
+                <div class="form-group">
+                    <label>Tipo de Vehículo</label>
+                    <select id="f-type" onchange="onTypeChange('f')">
+                        <option value="moto">🏍 Moto / Motocicleta</option>
+                        <option value="carro">🚗 Carro / Automóvil</option>
+                        <option value="camioneta">🚙 Camioneta</option>
+                    </select>
+                </div>
+
+                <div id="f-unavail" class="unavail-notice">
+                    <div class="unavail-icon">🚧</div>
+                    <div class="unavail-text">
+                        <strong>Opción aún no disponible en esta versión</strong>
+                        <p>El soporte para automóviles y camionetas se encuentra en desarrollo. Por el momento solo está
+                            permitido registrar motos.</p>
+                    </div>
+                </div>
+
+                <div id="f-moto-fields">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nombre / Modelo *</label>
+                            <input id="f-name" type="text" placeholder="Ej: Honda Twister">
+                        </div>
+                        <div class="form-group">
+                            <label>Placa / Patente *</label>
+                            <input id="f-plate" type="text" placeholder="ABC-123">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Cilindraje (CC)</label>
+                            <select id="f-cc">
+                                <option value="bajo">Bajo cc (Hasta 250 cc)</option>
+                                <option value="medio">Medio cc (250 - 600 cc)</option>
+                                <option value="alto">Alto cc (600 cc en adelante)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Kilometraje Actual *</label>
+                            <input id="f-km" type="number" placeholder="Ej: 12000">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Foto de la Moto</label>
+                        <div class="file-input-wrapper">
+                            <label for="f-photo" id="f-photo-label" class="file-input-label">📸 Subir o Tomar
+                                Foto</label>
+                            <input id="f-photo" type="file" accept="image/*" style="display:none;"
+                                onchange="processImage(this, 'f')">
+                        </div>
+                    </div>
+
+                    <hr class="form-divider">
+                    <div class="form-st">SOAT (SEGURO OBLIGATORIO)</div>
+                    <div class="form-group">
+                        <label>Fecha de Expedición</label>
+                        <input id="f-soat-start" type="date">
+                    </div>
+
+                    <hr class="form-divider">
+                    <div class="form-st">REVISIÓN TECNO-MECÁNICA</div>
+                    <div class="form-group">
+                        <label>Fecha de Última Revisión</label>
+                        <input id="f-tecno-start" type="date">
+                    </div>
+
+                    <hr class="form-divider">
+                    <div class="form-st">LLANTAS / NEUMÁTICOS (POR KILÓMETROS)</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Km de Compra (Opcional)</label>
+                            <input id="f-tire-km" type="number" placeholder="En blanco = Km Actual">
+                        </div>
+                        <div class="form-group">
+                            <label>Compuesto / Tipo de Uso</label>
+                            <select id="f-tire-use">
+                                <option value="normal">🏙 Ciudad / Blandas (Vida útil: 15,000 Km)</option>
+                                <option value="mixto">🛣 Mixto / Multipropósito (Vida útil: 12,000 Km)</option>
+                                <option value="sport">🏁 Sport / Pista (Vida útil: 8,000 Km)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <hr class="form-divider">
+                    <div class="form-st">SISTEMA INTELIGENTE DE ACEITE MOTOR</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Último Cambio Aceite (Km)</label>
+                            <input id="f-oil-km" type="number" placeholder="En blanco = Km Actual">
+                        </div>
+                        <div class="form-group">
+                            <label>Tipo de Aceite Utilizado</label>
+                            <select id="f-oil-type">
+                                <option value="mineral">🛢 Mineral</option>
+                                <option value="semi">⚡ Semi-Sintético</option>
+                                <option value="sintetico">🧪 Sintético Puro</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Último Mantenimiento General</label><input id="f-maint"
+                                type="date"></div>
+                        <div class="form-group"><label>Frecuencia (Meses)</label><input id="f-maint-interval"
+                                type="number" value="6"></div>
+                    </div>
+                </div>
+
+                <button id="f-submit" class="btn-submit" onclick="insertVehicle()">GUARDAR VEHÍCULO</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="editModal" class="modal-overlay" onclick="closeModalHandler(event)">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">MODIFICAR DATOS DEL VEHÍCULO</div>
+                <button class="modal-close" onclick="closeModalHandler(null, true)">✕</button>
+            </div>
+            <div id="e-moto-fields">
+                <div class="form-row">
+                    <div class="form-group"><label>Nombre</label><input id="e-name" type="text"></div>
+                    <div class="form-group"><label>Placa</label><input id="e-plate" type="text"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Cilindraje</label>
+                        <select id="e-cc">
+                            <option value="bajo">Bajo cc (Hasta 250 cc)</option>
+                            <option value="medio">Medio cc (250 - 600 cc)</option>
+                            <option value="alto">Alto cc (600 cc en adelante)</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Km Base Reajustado</label><input id="e-km" type="number"></div>
+                </div>
+                <div class="form-group">
+                    <label>Actualizar Imagen</label>
+                    <div class="file-input-wrapper">
+                        <label for="e-photo" id="e-photo-label" class="file-input-label">📸 Cambiar Imagen</label>
+                        <input id="e-photo" type="file" accept="image/*" style="display:none;"
+                            onchange="processImage(this, 'e')">
+                    </div>
+                </div>
+                <hr class="form-divider">
+                <div class="form-st">SOAT</div>
+                <div class="form-group"><label>Fecha de Expedición</label><input id="e-soat-start" type="date"></div>
+
+                <hr class="form-divider">
+                <div class="form-st">TECNO-MECÁNICA</div>
+                <div class="form-group"><label>Última Revisión</label><input id="e-tecno-start" type="date"></div>
+
+                <hr class="form-divider">
+                <div class="form-st">LLANTAS / NEUMÁTICOS</div>
+                <div class="form-row">
+                    <div class="form-group"><label>Km Compra</label><input id="e-tire-km" type="number"></div>
+                    <div class="form-group">
+                        <label>Compuesto</label>
+                        <select id="e-tire-use">
+                            <option value="normal">🏙 Ciudad (15,000 Km)</option>
+                            <option value="mixto">🛣 Mixto (12,000 Km)</option>
+                            <option value="sport">🏁 Sport (8,000 Km)</option>
+                        </select>
+                    </div>
+                </div>
+                <hr class="form-divider">
+                <div class="form-st">ACEITE MOTOR</div>
+                <div class="form-row">
+                    <div class="form-group"><label>Último Cambio Km</label><input id="e-oil-km" type="number"></div>
+                    <div class="form-group">
+                        <label>Tipo Aceite</label>
+                        <select id="e-oil-type">
+                            <option value="mineral">🛢 Mineral</option>
+                            <option value="semi">⚡ Semi-Sintético</option>
+                            <option value="sintetico">🧪 Sintético Puro</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Fecha Mant. General</label><input id="e-maint" type="date"></div>
+                    <div class="form-group"><label>Cada (Meses)</label><input id="e-maint-interval" type="number"></div>
+                </div>
+            </div>
+            <button class="btn-submit" onclick="save()">APLICAR CAMBIOS</button>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        const KM_PROMEDIO_DIARIO = 27.3;
+        const MARGEN_ALERTA_DIAS = 30;
+        const MARGEN_ALERTA_KM = 400;
+
+        const LIMITE_KM_NEUMATICOS = { normal: 15000, mixto: 12000, sport: 8000 };
+        const DINAMICA_ACEITE = {
+            bajo: { mineral: 2000, semi: 3000, sintetico: 5000 },
+            medio: { mineral: 3000, semi: 5000, sintetico: 7500 },
+            alto: { mineral: 4000, semi: 6000, sintetico: 10000 }
+        };
+
+        const STORAGE_KEY = 'user_garage_db';
+        let dataset = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        let activeEditId = null;
+        let base64ImageTemp = null;
+
+        // CONEXIÓN PRO: Inicializar el canal receptor de la pasarela de pago
+        const proChannel = new BroadcastChannel('autopulse_pro_stream');
+
+        function logout() {
+            window.location.href = 'index.html';
+        }
+
+        function commit() { localStorage.setItem(STORAGE_KEY, JSON.stringify(dataset)); }
+
+        function addOneYear(dateStr) {
+            if (!dateStr) return null;
+            const d = new Date(dateStr + 'T00:00:00');
+            d.setFullYear(d.getFullYear() + 1);
+            return d.toISOString().split('T')[0];
+        }
+
+        function computeLiveKm(v) {
+            if (!v.odometerBaseDate) return parseInt(v.baseKm) || 0;
+            const initialDate = new Date(v.odometerBaseDate);
+            const currentDate = new Date();
+            const elapsedTime = currentDate - initialDate;
+            const hoursPassed = Math.max(0, elapsedTime / (1000 * 60 * 60));
+            return Math.round((parseInt(v.baseKm) || 0) + (hoursPassed * KM_PROMEDIO_DIARIO));
+        }
+
+        function resolveOilInterval(cc, type) { return DINAMICA_ACEITE[cc || 'bajo'][type || 'mineral']; }
+
+        function processImage(input, prefix) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    base64ImageTemp = e.target.result;
+                    document.getElementById(`${prefix}-photo-label`).innerText = "✅ Foto Vinculada";
+                    document.getElementById(`${prefix}-photo-label`).style.color = "var(--green)";
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function getDaysGap(targetDate) {
+            if (!targetDate) return null;
+            const now = new Date(); now.setHours(0, 0, 0, 0);
+            return Math.round((new Date(targetDate + 'T00:00:00') - now) / 86400000);
+        }
+
+        function evaluateTires(v, currentLiveKm) {
+            const kmMontado = v.tireKm !== undefined && v.tireKm !== null && v.tireKm !== '' ? parseInt(v.tireKm) : parseInt(v.baseKm);
+            if (isNaN(kmMontado)) return null;
+            const kmRecorridos = Math.max(0, currentLiveKm - kmMontado);
+            const maxVidaKm = LIMITE_KM_NEUMATICOS[v.tireUse || 'normal'];
+            const kmRestantes = maxVidaKm - kmRecorridos;
+            const porcentajeUso = Math.min(100, (kmRecorridos / maxVidaKm) * 100);
+            const alertaGoma = porcentajeUso >= 85 || kmRestantes <= 1000;
+            return { recorridos: kmRecorridos, restantes: kmRestantes, percentage: porcentajeUso.toFixed(0), alertTrigger: alertaGoma };
+        }
+
+        function getMaintenanceDateGap(lastDate, intervalMonths) {
+            if (!lastDate || !intervalMonths) return null;
+            const d = new Date(lastDate + 'T00:00:00');
+            d.setMonth(d.getMonth() + parseInt(intervalMonths));
+            const now = new Date(); now.setHours(0, 0, 0, 0);
+            return Math.round((d - now) / 86400000);
+        }
+
+        function parseStatusClass(val, coreType) {
+            if (val === null) return 'ok';
+            if (val <= 0) return 'alert';
+            if (val <= (coreType === 'days' ? MARGEN_ALERTA_DIAS : MARGEN_ALERTA_KM)) return 'warning';
+            return 'ok';
+        }
+
+        function onTypeChange(prefix) {
+            const t = document.getElementById(`${prefix}-type`).value;
+            const unavail = document.getElementById(`${prefix}-unavail`);
+            const fields = document.getElementById(`${prefix}-moto-fields`);
+            const btn = document.getElementById(`${prefix}-submit`);
+
+            if (t !== 'moto') { unavail.classList.add('show'); fields.style.opacity = '0.3'; if (btn) btn.disabled = true; }
+            else { unavail.classList.remove('show'); fields.style.opacity = '1'; if (btn) btn.disabled = false; }
+        }
+
+        function showToast(msg, type = 'success') {
+            const t = document.getElementById('toast'); t.innerText = msg;
+            t.className = `toast show ${type}`;
+            setTimeout(() => { t.classList.remove('show'); }, 3000);
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', (i === 0 && tab === 'vehicles') || (i === 1 && tab === 'add')));
+            document.getElementById('tab-vehicles').classList.toggle('active', tab === 'vehicles');
+            document.getElementById('tab-add').classList.toggle('active', tab === 'add');
+            if (tab === 'add') checkPremiumStatus();
+        }
+
+        function checkPremiumStatus() {
+            const lock = document.getElementById('premiumLock');
+
+            const savedExpiry = localStorage.getItem('autopulse_pro_expiry');
+            const isProSimulated = savedExpiry && parseInt(savedExpiry) > Date.now();
+
+            if (isProSimulated) {
+                lock.classList.remove('active');
+            } else {
+                if (dataset.length >= 1) {
+                    lock.classList.add('active');
+                } else {
+                    lock.classList.remove('active');
+                }
+            }
+        }
+
+        function redirectToPremium() {
+            window.location.href = 'https://autopulse.tucontenido.com.co/?page_id=309';
+        }
+
+        function insertVehicle() {
+            const name = document.getElementById('f-name').value.trim();
+            const plate = document.getElementById('f-plate').value.trim();
+            const baseKmStr = document.getElementById('f-km').value;
+
+            if (!name || !plate || !baseKmStr) { showToast('❌ Completa los campos obligatorios (*)', 'error'); return; }
+
+            const savedExpiry = localStorage.getItem('autopulse_pro_expiry');
+            const isProSimulated = savedExpiry && parseInt(savedExpiry) > Date.now();
+
+            if (dataset.length >= 1 && !isProSimulated) {
+                showToast('❌ Límite gratuito alcanzado', 'error');
+                checkPremiumStatus();
+                return;
+            }
+
+            const item = {
+                id: 'v_' + Date.now(),
+                name, plate,
+                cc: document.getElementById('f-cc').value,
+                baseKm: parseInt(baseKmStr) || 0,
+                odometerBaseDate: new Date().toISOString(),
+                image: base64ImageTemp,
+                soatDate: document.getElementById('f-soat-start').value,
+                tecnoDate: document.getElementById('f-tecno-start').value,
+                tireKm: document.getElementById('f-tire-km').value !== '' ? parseInt(document.getElementById('f-tire-km').value) : null,
+                tireUse: document.getElementById('f-tire-use').value,
+                oilKm: document.getElementById('f-oil-km').value !== '' ? parseInt(document.getElementById('f-oil-km').value) : null,
+                oilType: document.getElementById('f-oil-type').value,
+                lastMaint: document.getElementById('f-maint').value,
+                maintInterval: parseInt(document.getElementById('f-maint-interval').value) || 6
+            };
+
+            dataset.push(item); commit(); base64ImageTemp = null;
+            document.getElementById('f-name').value = ''; document.getElementById('f-plate').value = ''; document.getElementById('f-km').value = ''; document.getElementById('f-photo-label').innerHTML = "📸 Subir o Tomar Foto"; document.getElementById('f-photo-label').style.color = "var(--gray)";
+            showToast('✅ Vehículo registrado con éxito'); switchTab('vehicles'); renderVehicles();
+        }
+
+        function toggleDetails(id) {
+            const d = document.getElementById(`details-${id}`); const c = document.getElementById(`chevron-${id}`);
+            if (d.classList.contains('open')) { d.classList.remove('open'); c.classList.remove('open'); }
+            else { d.classList.add('open'); c.classList.add('open'); }
+        }
+
+        function openEditModal(id) {
+            const v = dataset.find(item => item.id === id); if (!v) return;
+            activeEditId = id;
+
+            document.getElementById('e-name').value = v.name || '';
+            document.getElementById('e-plate').value = v.plate || '';
+            document.getElementById('e-cc').value = v.cc || 'bajo';
+            document.getElementById('e-km').value = v.baseKm || 0;
+            document.getElementById('e-soat-start').value = v.soatDate || '';
+            document.getElementById('e-tecno-start').value = v.tecnoDate || '';
+            document.getElementById('e-tire-km').value = v.tireKm !== null && v.tireKm !== undefined ? v.tireKm : '';
+            document.getElementById('e-tire-use').value = v.tireUse || 'normal';
+            document.getElementById('e-oil-km').value = v.oilKm !== null && v.oilKm !== undefined ? v.oilKm : '';
+            document.getElementById('e-oil-type').value = v.oilType || 'mineral';
+            document.getElementById('e-maint').value = v.lastMaint || '';
+            document.getElementById('e-maint-interval').value = v.maintInterval || 6;
+
+            base64ImageTemp = null;
+            document.getElementById('e-photo-label').innerHTML = "📸 Cambiar Imagen";
+            document.getElementById('e-photo-label').style.color = "var(--gray)";
+            document.getElementById('editModal').classList.add('open');
+        }
+
+        function closeModalHandler(e, force = false) {
+            if (force || (e && e.target === document.getElementById('editModal'))) {
+                document.getElementById('editModal').classList.remove('open');
+                activeEditId = null; base64ImageTemp = null;
+            }
+        }
+
+        function save() {
+            if (!activeEditId) return;
+            const v = dataset.find(item => item.id === activeEditId);
+            if (!v) { showToast('❌ Error: Vehículo no encontrado', 'error'); return; }
+
+            v.name = document.getElementById('e-name').value.trim();
+            v.plate = document.getElementById('e-plate').value.trim();
+            v.baseKm = parseInt(document.getElementById('e-km').value) || 0;
+            v.cc = document.getElementById('e-cc').value;
+            v.soatDate = document.getElementById('e-soat-start').value;
+            v.tecnoDate = document.getElementById('e-tecno-start').value;
+            v.tireKm = document.getElementById('e-tire-km').value !== '' ? parseInt(document.getElementById('e-tire-km').value) : null;
+            v.tireUse = document.getElementById('e-tire-use').value;
+            v.oilKm = document.getElementById('e-oil-km').value !== '' ? parseInt(document.getElementById('e-oil-km').value) : null;
+            v.oilType = document.getElementById('e-oil-type').value;
+            v.lastMaint = document.getElementById('e-maint').value;
+            v.maintInterval = parseInt(document.getElementById('e-maint-interval').value) || 6;
+
+            if (base64ImageTemp) { v.image = base64ImageTemp; base64ImageTemp = null; }
+
+            commit(); activeEditId = null;
+            document.getElementById('editModal').classList.remove('open');
+            renderVehicles();
+            showToast('✅ Cambios guardados', 'success');
+        }
+
+        function deleteVehicle(id) {
+            if (confirm('¿Eliminar por completo esta motocicleta del garaje?')) {
+                dataset = dataset.filter(item => item.id !== id); commit();
+                renderVehicles(); showToast('🗑️ Vehículo removido');
+            }
+        }
+
+        function renderVehicles() {
+            const list = document.getElementById('vehicleList');
+            const logArea = document.getElementById('alertList');
+            list.innerHTML = ''; logArea.innerHTML = '';
+
+            if (dataset.length === 0) {
+                list.innerHTML = `<div class="empty-state"><div class="empty-icon">🛵</div><div class="empty-title">Tu garaje está vacío</div><div class="empty-sub">Registra tu motocicleta para iniciar el monitoreo inteligente.</div></div>`;
+                document.getElementById('alertBadge').style.display = 'none';
+                document.getElementById('alertBanner').style.display = 'none';
+                return;
+            }
+
+            let totalAlertsCount = 0;
+
+            dataset.forEach(v => {
+                const liveKm = computeLiveKm(v);
+                const limitSoat = addOneYear(v.soatDate);
+                const limitTecno = addOneYear(v.tecnoDate);
+
+                const gapSoat = getDaysGap(limitSoat);
+                const gapTecno = getDaysGap(limitTecno);
+
+                const ultimoCambioAceite = v.oilKm !== null && v.oilKm !== undefined ? v.oilKm : v.baseKm;
+                const maxAceiteKm = resolveOilInterval(v.cc, v.oilType);
+                const gapOil = maxAceiteKm - (liveKm - ultimoCambioAceite);
+
+                const gapMaint = getMaintenanceDateGap(v.lastMaint, v.maintInterval);
+                const tireStats = evaluateTires(v, liveKm);
+
+                let vStatus = 'ok';
+                if ((gapSoat !== null && gapSoat <= 0) || (gapTecno !== null && gapTecno <= 0) || (gapOil <= 0) || (gapMaint !== null && gapMaint <= 0) || (tireStats && tireStats.alertTrigger)) {
+                    vStatus = 'alert';
+                } else if ((gapSoat !== null && gapSoat <= MARGEN_ALERTA_DIAS) || (gapTecno !== null && gapTecno <= MARGEN_ALERTA_DIAS) || (gapOil <= MARGEN_ALERTA_KM) || (gapMaint !== null && gapMaint <= MARGEN_ALERTA_DIAS)) {
+                    vStatus = 'warning';
+                }
+
+                const imgHtml = v.image ? `<img class="vehicle-img-preview" src="${v.image}">` : `<div class="vehicle-icon">🏍️</div>`;
+                const bigImgHtml = v.image ? `<img class="vehicle-large-img" src="${v.image}">` : '';
+
+                let tireSectionHtml = '';
+                if (tireStats) {
+                    let tireStatusText = `Restan ${tireStats.restantes.toLocaleString()} Km de vida útil`;
+                    let tireClass = 'ok';
+                    if (tireStats.alertTrigger) { tireStatusText = '🚨 ¡REEMPLAZO CRÍTICO RECOMENDADO!'; tireClass = 'alert'; }
+                    else if (tireStats.percentage >= 70) { tireStatusText = '⚠️ Desgaste moderado'; tireClass = 'warning'; }
+
+                    tireSectionHtml = `
+          <div class="sub-label">Neumáticos Trasero/Delantero</div>
+          <div class="tire-bar-wrap">
+            <div style="display:flex; justify-content:space-between; font-size:11px;">
+              <span style="font-weight:600; color:${tireClass === 'alert' ? 'var(--red)' : tireClass === 'warning' ? 'var(--red)' : 'var(--green)'}">${tireStatusText}</span>
+              <span style="color:var(--gray)">${tireStats.percentage}% de uso</span>
+            </div>
+            <div class="tire-progress-bg">
+              <div class="tire-progress-fill" style="width:${tireStats.percentage}%; background:${tireClass === 'alert' ? 'var(--red)' : tireClass === 'warning' ? 'var(--red)' : 'var(--green)'}"></div>
+            </div>
+            <div class="tire-chips">
+              <div class="tire-chip"><div class="chip-label">Recorridos</div><div class="chip-val">${tireStats.recorridos.toLocaleString()} km</div></div>
+              <div class="tire-chip"><div class="chip-label">Tipo Compuesto</div><div class="chip-val" style="text-transform:capitalize">${v.tireUse || 'normal'}</div></div>
+            </div>
+            ${tireStats.alertTrigger ? `<div class="tire-alert-box"><div class="tire-alert-icon">🛑</div><div class="tire-alert-text"><strong>Riesgo de Derrape o Pinchazo</strong>La banda de rodadura superó el límite de seguridad (${LIMITE_KM_NEUMATICOS[v.tireUse || 'normal'].toLocaleString()} km). Se sugiere inspección o cambio inmediato.</div></div>` : ''}
+          </div>
+        `;
+                }
+
+                const card = document.createElement('div');
+                card.className = 'vehicle-card';
+                card.innerHTML = `
+        <div class="vehicle-header" onclick="toggleDetails('${v.id}')">
+          ${imgHtml}
+          <div class="vehicle-info">
+            <div class="vehicle-name">${v.name}</div>
+            <div class="vehicle-sub">${v.plate.toUpperCase()} • Odo: ${liveKm.toLocaleString()} Km</div>
+          </div>
+          <div class="vehicle-right">
+            <div class="status-dot ${vStatus}"></div>
+            <div id="chevron-${v.id}" class="chevron">▼</div>
+          </div>
+        </div>
+        <div id="details-${v.id}" class="vehicle-details">
+          <div class="vehicle-details-inner">
+            ${bigImgHtml}
+            <div class="sub-label">Estado de Consumibles</div>
+            <div class="maint-grid">
+              <div class="maint-item ${parseStatusClass(gapOil, 'km')}">
+                <div class="maint-label">Aceite de Motor</div>
+                <div class="maint-value">${gapOil <= 0 ? 'Cambio Ya' : gapOil.toLocaleString() + ' Km'}</div>
+                <div class="maint-status ${parseStatusClass(gapOil, 'km')}">${gapOil <= 0 ? 'Excedido' : 'Restante'}</div>
+              </div>
+              <div class="maint-item ${parseStatusClass(gapMaint, 'days')}">
+                <div class="maint-label">Mant. General</div>
+                <div class="maint-value">${gapMaint === null ? 'Sin fecha' : gapMaint <= 0 ? 'Vencido' : gapMaint + ' días'}</div>
+                <div class="maint-status ${parseStatusClass(gapMaint, 'days')}">${gapMaint === null ? '-' : gapMaint <= 0 ? 'Toca Hacerlo' : 'Vence'}</div>
+              </div>
+            </div>
+
+            <div class="sub-label">Documentación Legal</div>
+            <div style="display:grid; grid-template-columns:1fr; gap:8px;">
+              <div class="doc-block ${parseStatusClass(gapSoat, 'days')}">
+                <div class="maint-label">SOAT Seguro Obligatorio</div>
+                <div class="doc-dates">
+                  <div><div class="doc-date-label">Control Inicial</div><div class="doc-date-val">${v.soatDate || 'No cargado'}</div></div>
+                  <div><div class="doc-date-label">Próximo Vencimiento</div><div class="doc-date-val">${limitSoat || 'No cargado'}</div></div>
+                </div>
+                <div class="maint-status ${parseStatusClass(gapSoat, 'days')}" style="margin-top:6px">${gapSoat === null ? 'Falta fecha' : gapSoat <= 0 ? 'SEGURO VENCIDO OBLIGATORIO' : 'Vence en ' + gapSoat + ' días'}</div>
+              </div>
+              <div class="doc-block ${parseStatusClass(gapTecno, 'days')}">
+                <div class="maint-label">Revisión Tecno-Mecánica</div>
+                <div class="doc-dates">
+                  <div><div class="doc-date-label">Último Trámite</div><div class="doc-date-val">${v.tecnoDate || 'No cargado'}</div></div>
+                  <div><div class="doc-date-label">Próxima Revisión</div><div class="doc-date-val">${limitTecno || 'No cargado'}</div></div>
+                </div>
+                <div class="maint-status ${parseStatusClass(gapTecno, 'days')}" style="margin-top:6px">${gapTecno === null ? 'Falta fecha' : gapTecno <= 0 ? 'REVISIÓN VENCIDA' : 'Vence en ' + gapTecno + ' días'}</div>
+              </div>
+            </div>
+
+            ${tireSectionHtml}
+
+            <div class="card-actions">
+              <button class="btn-edit" onclick="openEditModal('${v.id}')">⚙️ Ajustes</button>
+              <button class="btn-delete" onclick="deleteVehicle('${v.id}')">🗑️ Retirar</button>
+            </div>
+          </div>
+        </div>
+      `;
+                list.appendChild(card);
+
+                if (gapSoat !== null && gapSoat <= MARGEN_ALERTA_DIAS) {
+                    totalAlertsCount++;
+                    logArea.innerHTML += `<div class="alert-item">📄 <strong>${v.name}</strong>: SOAT ${gapSoat <= 0 ? 'VENCIDO' : 'vence en ' + gapSoat + ' días'}.</div>`;
+                }
+                if (gapTecno !== null && gapTecno <= MARGEN_ALERTA_DIAS) {
+                    totalAlertsCount++;
+                    logArea.innerHTML += `<div class="alert-item">📄 <strong>${v.name}</strong>: Tecnomecánica ${gapTecno <= 0 ? 'VENCIDA' : 'vence en ' + gapTecno + ' días'}.</div>`;
+                }
+                if (gapOil !== null && gapOil <= MARGEN_ALERTA_KM) {
+                    totalAlertsCount++;
+                    logArea.innerHTML += `<div class="alert-item">🔧 <strong>${v.name}</strong>: Aceite de motor ${gapOil <= 0 ? 'EXCEDIDO' : 'cambiar en ' + gapOil + ' Km'}.</div>`;
+                }
+                if (gapMaint !== null && gapMaint <= MARGEN_ALERTA_DIAS) {
+                    totalAlertsCount++;
+                    logArea.innerHTML += `<div class="alert-item">🔧 <strong>${v.name}</strong>: Mantenimiento General ${gapMaint <= 0 ? 'VENCIDO' : 'toca en ' + gapMaint + ' días'}.</div>`;
+                }
+                if (tireStats && tireStats.alertTrigger) {
+                    totalAlertsCount++;
+                    logArea.innerHTML += `<div class="alert-item">🛑 <strong>${v.name}</strong>: Neumáticos con desgaste avanzado detectados en ${v.name}.</div>`;
+                }
+            });
+
+            const badge = document.getElementById('alertBadge');
+            const banner = document.getElementById('alertBanner');
+
+            if (totalAlertsCount > 0) {
+                badge.innerText = `${totalAlertsCount} Alertas`;
+                badge.style.display = 'block'; banner.style.display = 'block';
+            } else {
+                badge.style.display = 'none'; banner.style.display = 'none';
+            }
+        }
+
+        // INTERCONEXIÓN EN TIEMPO REAL CON LA PASARELA
+        proChannel.onmessage = (e) => {
+            if (e.data.event === 'PRO_ACTIVATED') {
+                showToast('👑 ¡Autopulse PRO activado por 1 hora!', 'success');
+                checkPremiumStatus();
+            }
+            if (e.data.event === 'PRO_EXPIRED') {
+                showToast('⚠️ Tu acceso temporal a Autopulse PRO ha expirado.', 'error');
+                checkPremiumStatus();
+            }
+        };
+
+        window.onload = function () {
+            renderVehicles();
+            setInterval(renderVehicles, 30000);
+            setInterval(checkPremiumStatus, 5000);
+        };
+    </script>
+</body>
+
+</html>
